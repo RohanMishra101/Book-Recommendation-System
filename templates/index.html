@@ -1,1 +1,474 @@
-BookBreeze
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Book Recommendation System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet" />
+</head>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f8f9fa;
+        color: #343a40;
+    }
+
+    nav.navbar {
+        background-color: #343a40;
+        color: white;
+        padding: 1rem;
+    }
+
+    nav.navbar a {
+        color: white;
+        margin-right: 1rem;
+        text-decoration: none;
+    }
+
+    nav.navbar a:hover {
+        color: #f8f9fa;
+    }
+
+    .container {
+        margin-top: 2rem;
+    }
+
+    h1 {
+        font-weight: bold;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .card {
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        border: none;
+        border-radius: 10px;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-body {
+        text-align: center;
+        flex-grow: 1;
+    }
+
+    .card-img-top {
+        border-radius: 10px 10px 0 0;
+        height: 200px;
+        object-fit: cover;
+    }
+
+    h2 {
+        font-size: 1.25rem;
+        margin-top: 1rem;
+    }
+
+    p {
+        margin: 0.5rem 0;
+    }
+
+
+
+
+    .loading {
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 9999;
+    }
+
+    .loading .spinner-border {
+        width: 3rem;
+        height: 3rem;
+    }
+
+    [data-aos] {
+        opacity: 0;
+        transition-property: transform, opacity;
+        transition-duration: 0.6s;
+        transition-timing-function: ease-in-out;
+    }
+
+    [data-aos="fade-up"] {
+        transform: translateY(20px);
+    }
+
+    [data-aos].aos-animate {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    form input[type="text"] {
+        border-radius: 30px 0 0 30px;
+        border: 2px solid #007bff;
+        padding: 10px 20px;
+        transition: box-shadow 0.3s ease;
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    form input[type="text"]:focus {
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    }
+
+    form button i {
+        font-size: 1.4rem;
+    }
+
+    .no-books-found {
+        border: 2px dotted #343a40;
+        padding: 20px;
+        margin: 20px 0;
+        border-radius: 10px;
+        background-color: #f8f9fa;
+    }
+
+    .no-books-found h2 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #343a40;
+    }
+
+    .custom-show-more-btn {
+        background-color: #343a40;
+        color: #ffffff;
+        border: 2px solid #ffffff;
+        padding: 10px 30px;
+        font-size: 18px;
+        font-weight: 600;
+        border-radius: 30px;
+        transition: all 0.3s ease;
+        margin-bottom: 20px;
+    }
+
+    .custom-show-more-btn:hover {
+        background-color: #ffffff;
+        color: #343a40;
+        border: 2px solid #343a40;
+        transform: scale(1.05);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    #suggestions {
+        z-index: 1050;
+        /* Higher than most common UI elements */
+        position: absolute;
+        /* Ensure it stays within the container */
+    }
+
+    /* carousel */
+    .carousel-outer-wrapper {
+        width: 100%;
+        /* Takes full width of the container */
+        overflow: hidden;
+        /* Ensures only 4 cards are visible at a time */
+    }
+
+    #carousel {
+        display: flex;
+        transition: transform 0.5s ease-in-out;
+
+        width: calc(25% * 4);
+        /* Adjusts the width to hold all cards */
+    }
+
+    .card-wrapper {
+        min-width: 25%;
+        /* Ensures 4 cards are visible at a time */
+        box-sizing: border-box;
+        padding: 10px;
+    }
+
+    .card {
+        height: 250px;
+        /* Adjust height according to your design */
+        width: 100%;
+        /* Make sure the card takes up the full width of the wrapper */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+    }
+
+    .card-img-top {
+        height: 150px;
+        /* Adjust the image height */
+        object-fit: cover;
+        /* Ensure the image covers the area properly */
+        border-radius: 10px 10px 0 0;
+    }
+
+    .card-body {
+        padding: 10px;
+        text-align: center;
+        flex-grow: 1;
+    }
+
+    #carousel-prev,
+    #carousel-next {
+        z-index: 1050;
+        background-color: rgba(255, 255, 255, 0.8);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        border: none;
+        color: black;
+        /* Default icon color */
+        transition: background-color 0.3s ease, color 0.3s ease;
+        /* Smooth transition */
+    }
+
+    #carousel-prev:hover,
+    #carousel-next:hover {
+        background-color: black;
+        /* Change background to black on hover */
+        color: white;
+        /* Change icon color to white on hover */
+    }
+</style>
+
+<body>
+    <!-- Loading Animation -->
+    <div class="loading">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand mb-0 h1" href="#">Book Recommendation System</a>
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item"><a class="nav-link" href="#">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <h1>Welcome to the Book Recommendation System</h1>
+            </div>
+
+            <!-- Search Form -->
+            <div class="container mt-5">
+                <div class="row justify-content-center">
+                    <div class="col-md-8 position-relative">
+                        <form action="/recommend_book" method="post" class="d-flex">
+                            <input type="text" id="search-input" name="book_name" class="form-control me-2"
+                                placeholder="Enter a book name"
+                                style="border: 2px solid black; border-radius: 30px 0 0 30px" autocomplete="off" />
+                            <button type="submit" class="btn btn-outline-dark" style="border: 2px solid black">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </form>
+                        <ul id="suggestions" class="list-group position-absolute w-100"></ul> <!-- Suggestion list -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Collaborative Filtering Based Recommender System -->
+            <div class="container mt-5" id="search-results-section">
+                <h2 class="text-center my-4 py-2 border-bottom border-dark">Books Related to "{{ searched_book_name }}"
+                </h2>
+                <div class="position-relative">
+                    <!-- Carousel Outer Wrapper (limits the visibility to 4 cards) -->
+                    <div class="carousel-outer-wrapper">
+                        <!-- Carousel Wrapper (holds all the cards) -->
+                        <div id="carousel" class="d-flex">
+                            {% for item in data %}
+                            <div class="card-wrapper">
+                                <div class="card d-flex flex-column h-100">
+                                    <img class="card-img-top" src="{{ item[2][0] }}" alt="Book Image" />
+                                    <div class="card-body flex-grow-1">
+                                        <h2>{{ item[0][0] }}</h2>
+                                        <p><strong>Author:</strong> {{ item[1][0] }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Left and Right Navigation Buttons -->
+                    <button id="carousel-prev" class="btn btn-outline-dark position-absolute"
+                        style="top: 50%; left: 0; transform: translateY(-50%);">
+                        &#9664; <!-- Left arrow icon -->
+                    </button>
+                    <button id="carousel-next" class="btn btn-outline-dark position-absolute"
+                        style="top: 50%; right: 0; transform: translateY(-50%);">
+                        &#9654; <!-- Right arrow icon -->
+                    </button>
+                </div>
+            </div>
+
+
+            <!-- Popularity based recommended Books -->
+            <div class="container">
+                <h2 class="text-center my-4 py-2 border-bottom border-dark">Popular Books</h2>
+                <div class="row" id="book-list">
+                    {% for i in range(book_name|length) %}
+                    {% if i < 20 %} <div class="col-12 col-md-6 col-lg-3 mb-4 book-item" data-aos="fade-up">
+                        {% else %}
+                        <div class="col-12 col-md-6 col-lg-3 mb-4 book-item" data-aos="fade-up" style="display: none;">
+                            {% endif %}
+                            <div class="card d-flex flex-column h-100">
+                                <img class="card-img-top" src="{{ image[i] }}" alt="Book Image" />
+                                <div class="card-body flex-grow-1">
+                                    <h2>{{ book_name[i] }}</h2>
+                                    <p><strong>Author:</strong> {{ author[i] }}</p>
+                                    <p><strong>Votes:</strong> {{ votes[i] }}</p>
+                                    <p><strong>Rating:</strong> {{ rating[i] | round(1) }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                </div>
+                <div class="text-center mt-4 mb-5">
+                    <button id="show-more" class="btn custom-show-more-btn">Show More</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.js"></script>
+    <script>
+        // Remove loading animation after the page is loaded
+        window.addEventListener("load", function () {
+            document.querySelector(".loading").style.display = "none";
+        });
+
+        // Scroll animation using AOS library
+        document.addEventListener("DOMContentLoaded", function () {
+            const elements = document.querySelectorAll("[data-aos]");
+
+            function animateOnScroll() {
+                elements.forEach((el) => {
+                    const rect = el.getBoundingClientRect();
+                    if (rect.top < window.innerHeight && rect.bottom >= 0) {
+                        el.classList.add("aos-animate");
+                    }
+                });
+            }
+
+            window.addEventListener("scroll", animateOnScroll);
+            animateOnScroll(); // Initial check
+
+            // Show More Functionality
+            let visibleCount = 10;
+            const totalItems = 200; // Ensure this outputs a number
+            const showMoreButton = document.getElementById('show-more');
+
+            showMoreButton.addEventListener('click', function () {
+                visibleCount += 10;
+                const items = document.querySelectorAll('.book-item');
+
+                for (let i = 0; i < visibleCount && i < totalItems; i++) {
+                    items[i].style.display = 'block';
+                }
+
+                if (visibleCount >= totalItems) {
+                    showMoreButton.style.display = 'none';
+                }
+
+                // Ensure new items are also animated on scroll
+                animateOnScroll();
+            });
+
+            //carousel
+            const carousel = document.getElementById('carousel');
+            const cards = document.querySelectorAll('.card-wrapper');
+            const totalCards = cards.length;
+            let currentIndex = 0;
+
+            function updateCarousel() {
+                const offset = currentIndex * -25; // 25% is the width of one card
+                carousel.style.transform = `translateX(${offset}%)`;
+            }
+
+            document.getElementById('carousel-next').addEventListener('click', function () {
+                if (currentIndex < totalCards - 4) { // Stop scrolling if the last visible card is reached
+                    currentIndex++;
+                } else {
+                    currentIndex = 0; // Circular behavior to go back to the start
+                }
+                updateCarousel();
+            });
+
+            document.getElementById('carousel-prev').addEventListener('click', function () {
+                if (currentIndex > 0) {
+                    currentIndex--;
+                } else {
+                    currentIndex = totalCards - 4; // Circular behavior to go to the last visible set
+                }
+                updateCarousel();
+            });
+        });
+
+        // Real-time search recommendations
+        document.getElementById('search-input').addEventListener('input', function () {
+            const query = this.value;
+            if (query.length > 1) { // Trigger search after 2 characters
+                fetch(`/search?query=${query}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(data);  // Log the data to check structure
+                        const suggestions = document.getElementById('suggestions');
+                        suggestions.innerHTML = ''; // Clear previous suggestions
+
+                        // Limit the number of suggestions to 5
+                        const limitedData = data.slice(0, 5);
+
+                        limitedData.forEach(book => {
+                            const li = document.createElement('li');
+                            li.className = "list-group-item d-flex align-items-center"; // Use Bootstrap styling
+
+                            // Add book image
+                            const img = document.createElement('img');
+                            img.src = book['Image-URL-M']; // Assuming 'Image-URL-M' is the key for the image URL
+                            img.alt = book['Book-Title'];
+                            img.style.width = '50px'; // Adjust image size
+                            img.style.height = 'auto';
+                            img.className = "me-3"; // Bootstrap margin class
+
+                            // Add book title and author
+                            const textDiv = document.createElement('div');
+                            textDiv.innerHTML = `<strong>${book['Book-Title']}</strong><br><small>by ${book['Book-Author']}</small>`;
+
+                            // Make the whole item clickable
+                            li.style.cursor = 'pointer';
+                            li.addEventListener('click', () => {
+                                document.getElementById('search-input').value = book['Book-Title']; // Set input to the selected book
+                                suggestions.innerHTML = ''; // Clear suggestions
+                            });
+
+                            li.appendChild(img);
+                            li.appendChild(textDiv);
+                            suggestions.appendChild(li);
+                        });
+                    });
+            } else {
+                document.getElementById('suggestions').innerHTML = ''; // Clear suggestions if input is too short
+            }
+        });
+
+    </script>
+
+
+</body>
+
+</html>
