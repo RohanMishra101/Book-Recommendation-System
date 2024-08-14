@@ -23,8 +23,13 @@ def index():
 @app.route("/recommend_book", methods=["POST"])
 def recommend_book():
     book_name = request.form.get('book_name')
+
+    if not book_name:  # Check if the input is empty
+        return render_template('index.html', error_message="Please enter a book name to search for recommendations.")
+
     data = []
-    searched_book_name = book_name
+    searched_book_name = book_name  # Capture the searched book name
+
     try:
         index = np.where(pt.index == book_name)[0][0]
         similar_items = sorted(list(enumerate(similarity_score[index])), key=lambda x: x[1], reverse=True)[1:20]
@@ -41,7 +46,18 @@ def recommend_book():
         # If the book is not found in the index, data remains empty
         pass
 
-    # Always pass popular books data along with search results (if any)
+    if not data:  # Check if no related books were found
+        return render_template('index.html', 
+                               searched_book_name=searched_book_name,
+                                no_results=True,
+                                data=data,
+                                book_name=list(popular_df['Book-Title'].values),
+                                author=list(popular_df['Book-Author_x'].values),
+                                image=list(popular_df['Image-URL-M_x'].values),
+                                votes=list(popular_df['num-ratings'].values),
+                                rating=list(popular_df['avg-rating'].values))
+
+    # Pass the searched book name along with the data
     return render_template('index.html',
                            searched_book_name=searched_book_name,
                            data=data,
@@ -50,6 +66,7 @@ def recommend_book():
                            image=list(popular_df['Image-URL-M_x'].values),
                            votes=list(popular_df['num-ratings'].values),
                            rating=list(popular_df['avg-rating'].values))
+
 
 # New route for real-time search recommendations
 @app.route("/search", methods=["GET"])

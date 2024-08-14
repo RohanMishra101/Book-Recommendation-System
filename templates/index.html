@@ -280,6 +280,15 @@
 
             <!-- Collaborative Filtering Based Recommender System -->
             <div class="container mt-5" id="search-results-section">
+                {% if error_message %}
+                <div class="alert alert-warning text-center" role="alert">
+                    {{ error_message }}
+                </div>
+                {% elif no_results %}
+                <div class="alert alert-info text-center" role="alert">
+                    No books found to recommend related to "{{ searched_book_name }}".
+                </div>
+                {% else %}
                 <h2 class="text-center my-4 py-2 border-bottom border-dark">Books Related to "{{ searched_book_name }}"
                 </h2>
                 <div class="position-relative">
@@ -311,7 +320,10 @@
                         &#9654; <!-- Right arrow icon -->
                     </button>
                 </div>
+                {% endif %}
             </div>
+
+
 
 
             <!-- Popularity based recommended Books -->
@@ -369,7 +381,7 @@
             animateOnScroll(); // Initial check
 
             // Show More Functionality
-            let visibleCount = 10;
+            let visibleCount = 20;
             const totalItems = 200; // Ensure this outputs a number
             const showMoreButton = document.getElementById('show-more');
 
