@@ -71,18 +71,32 @@ def recommend_book():
 # New route for real-time search recommendations
 @app.route("/search", methods=["GET"])
 def search():
-    query = request.args.get('query', '')
+    query = request.args.get('query', '').strip().lower()  # Convert query to lowercase for case-insensitive comparison
     if query:
-        # Filter the books DataFrame based on the search query
-        recommendations = books[books['Book-Title'].str.contains(query, case=False, na=False) |
-                                books['Book-Author'].str.contains(query, case=False, na=False)]
-        
-        # Prepare the results to be sent as JSON
-        results = recommendations[['Book-Title', 'Book-Author', 'Image-URL-M']].drop_duplicates().head(10).to_dict(orient='records')
-        print(results)  # Print the results to check the structure
+        # Filter the books DataFrame to find any books whose title matches the current input
+        matching_books = books[books['Book-Title'].str.lower().str.contains(query, na=False)].drop_duplicates('Book-Title')
+
+        results = []
+        for book_name in matching_books['Book-Title'].head(10):  # Limit to 10 matching books
+            try:
+                index = np.where(pt.index == book_name)[0][0]
+                similar_items = sorted(list(enumerate(similarity_score[index])), key=lambda x: x[1], reverse=True)[1:5]  # Limit to top 5 similar books
+
+                for i in similar_items:
+                    temp_df = books[books['Book-Title'] == pt.index[i[0]]]
+                    result = {
+                        "Book-Title": temp_df.drop_duplicates('Book-Title')['Book-Title'].values[0],
+                        "Book-Author": temp_df.drop_duplicates('Book-Title')['Book-Author'].values[0],
+                        "Image-URL-M": temp_df.drop_duplicates('Book-Title')['Image-URL-M'].values[0]
+                    }
+                    results.append(result)
+            except IndexError:
+                continue
+
         return jsonify(results)
     else:
-        return jsonify([])
+        return jsonify([])  # Return an empty list if no query is provided
+
 
 if __name__ == '__main__':
     app.run(debug=True)
