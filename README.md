@@ -20,13 +20,21 @@ It's all about **collaborative filtering**: if users similar to you loved a book
 
 ---
 
-## 🖥️ A Peek Inside
+## 🖥️ A Peek Inside: Visual Showcase
 
-Check out the simplicity and functionality of the web application:
+See the application in action with large, clear screenshots showcasing the user flow.
 
-| Showcase | Search Feature | Output |
-| :---: | :---: | :---: |
-| ![Showcase](assets/showcase.png) | ![Search Feature](assets/search.png) | ![Output](assets/output.png) |
+### Application Overview
+(assets/showcase.png)
+
+### Search Interface
+(assets/search.png)
+
+### Recommendation Output
+
+
+[Image of Output]
+(assets/output.png)
 
 > 🖼️ **Note:** Place your awesome screenshots in an `assets/` folder to see them here! If you host on GitHub, you can use raw image URLs for continuous integration with your repo.
 
